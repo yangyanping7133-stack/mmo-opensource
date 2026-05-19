@@ -1,45 +1,45 @@
 # TALE — Token-Budget-Aware LLM Reasoning
 
-**论文**: [arXiv:2412.18547](https://arxiv.org/abs/2412.18547) (ACL 2025 Findings)
-**开源参考**: https://github.com/GeniusHTX/TALE
+**Paper**: [arXiv:2412.18547](https://arxiv.org/abs/2412.18547) (ACL 2025 Findings)
+**Open-source Reference**: https://github.com/GeniusHTX/TALE
 
-## 核心方法
+## Core Method
 
-TALE 通过动态估计 token 预算并在 prompt 中注入预算约束，引导模型生成更短的推理过程。
+TALE dynamically estimates token budgets and injects budget constraints into prompts to guide the model toward generating shorter reasoning processes.
 
-### 关键步骤
-1. **难度分类**: 根据数据集将问题分为 easy/medium/hard
-2. **预算估计**: 为每个难度级别预设 token 预算
-3. **Prompt 注入**: 在 prompt 中注入预算约束
-4. **推理生成**: 模型在预算约束下生成更简洁的推理
+### Key Steps
+1. **Difficulty Classification**: Categorize questions into easy/medium/hard based on dataset
+2. **Budget Estimation**: Preset token budgets for each difficulty level
+3. **Prompt Injection**: Inject budget constraints into the prompt
+4. **Reasoning Generation**: Model generates more concise reasoning under budget constraints
 
-### 预算分档
+### Budget Tiers
 
-| 难度 | 数据集 | 默认预算 | 最大预算 | Baseline Think Tokens |
-|------|--------|---------|---------|---------------------|
+| Difficulty | Datasets | Default Budget | Max Budget | Baseline Think Tokens |
+|------------|----------|---------------|------------|----------------------|
 | easy | GSM8K, AMC | 800 | 1500 | 1144 / 4240 |
 | medium | GPQA | 500 | 800 | 651 |
 | hard | MATH-500, AIME | 2000 | 4000 | 2800 / 7986 |
 
-### 部署模式
-- **preset**: 按数据集预设预算（免训练，即插即用）
-- **dynamic**: 基于问题复杂度微调预算（未来扩展）
+### Deployment Modes
+- **preset**: Preset budgets by dataset (training-free, plug-and-play)
+- **dynamic**: Fine-tune budgets based on question complexity (future extension)
 
-## 文件结构
+## File Structure
 
 ```
 implementations/tale/
 ├── src/
-│   ├── __init__.py    — 模块导出
-│   ├── core.py        — 核心引擎: TALEEngine
-│   ├── adapter.py     — 评测框架适配: TALEAdapter
-│   └── utils.py       — 工具函数
-├── config.yaml        — 配置参数
-├── paper_info.yaml    — 论文信息
-└── README.md          — 本文件
+│   ├── __init__.py    — Module exports
+│   ├── core.py        — Core engine: TALEEngine
+│   ├── adapter.py     — Eval framework adapter: TALEAdapter
+│   └── utils.py       — Utility functions
+├── config.yaml        — Configuration parameters
+├── paper_info.yaml    — Paper metadata
+└── README.md          — This file
 ```
 
-## 使用方式
+## Usage
 
 ```python
 from implementations.tale.src import TALEEngine
@@ -49,7 +49,7 @@ messages, budget = engine.build_messages(question, dataset="GSM8K")
 prompt_text, budget = engine.build_prompt_text(question, dataset="MATH500")
 ```
 
-### 运行评测
+### Run Evaluation
 
 ```bash
 python -m implementations.tale.src.adapter \

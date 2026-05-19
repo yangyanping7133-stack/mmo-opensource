@@ -8,17 +8,17 @@
 
 ## Executive Summary
 
-搜索到 **22 篇 2026 年论文**，按方法论分为 5 大类：
+Found **22 papers from 2026**, categorized into 5 groups by methodology:
 
-| 类别 | 论文数 | 最佳候选 | 训练要求 |
-|------|--------|----------|----------|
-| **A. 推理时压缩 (Inference-Time)** | 6 | CRISP, SAT, Hint Tuning, Whisper | 免训练 |
-| **B. RL 训练压缩** | 7 | ExpThink, LEAD, SmartThinker, STACK | 需RL训练 |
-| **C. 早期退出 (Early Exit)** | 3 | EAT, RCPD, Dynamic Early Exit | 免训练 |
-| **D. 理论/度量** | 3 | DTR (Think Deep), CIB, Shorter but Trustworthy | 免训练/分析 |
-| **E. 架构创新** | 3 | Draft-Thinking, ASC, MemoSight | 需SFT/修改 |
+| Category | Papers | Top Candidates | Training Required |
+|----------|--------|----------------|-------------------|
+| **A. Inference-Time Compression** | 6 | CRISP, SAT, Hint Tuning, Whisper | Training-free |
+| **B. RL-Based Compression** | 7 | ExpThink, LEAD, SmartThinker, STACK | Requires RL training |
+| **C. Early Exit** | 3 | EAT, RCPD, Dynamic Early Exit | Training-free |
+| **D. Theory/Metrics** | 3 | DTR (Think Deep), CIB, Shorter but Trustworthy | Training-free/Analysis |
+| **E. Architecture Innovation** | 3 | Draft-Thinking, ASC, MemoSight | Requires SFT/Modification |
 
-**关键发现**: DTR (Deep-Thinking Token Ratio) 不是压缩方法，而是**推理质量度量 + 采样策略**。对项目有重大参考价值。
+**Key Finding**: DTR (Deep-Thinking Token Ratio) is not a compression method, but a **reasoning quality metric + sampling strategy**. Extremely valuable as a reference for the project.
 
 ---
 
@@ -27,102 +27,102 @@
 ### 1. CRISP — Compressing Redundancy in CoT via Intrinsic Saliency Pruning
 - **ArXiv**: [2604.17297](https://arxiv.org/abs/2604.17297) (Apr 2026)
 - **Venue**: ACL 2026 Findings
-- **Method**: 利用 `</think` 终止 token 的注意力模式作为信息锚点，识别 CoT 中的冗余部分并原子级压缩
-- **Results**: **50-60% token 减少，精度不降**
-- **Training-Free**: ✅ (推理时方法)
+- **Method**: Uses the attention pattern of `</think` termination tokens as information anchors to identify redundant parts in CoT and perform atom-level compression
+- **Results**: **50-60% token reduction with no accuracy drop**
+- **Training-Free**: Yes (inference-time method)
 - **Code**: Open-sourced
-- **适用性分析**:
-  - ⭐ **高度适用**: 纯推理时方法，零训练成本
-  - 核心洞察：`</think` token 的注意力分布能区分关键推理 vs 冗余
-  - 原子级操作（不是粗粒度截断），保留逻辑连贯性
-  - 跨模型验证（多种 backbone + 数学数据集）
-  - **风险**: 需要 vLLM 暴露注意力权重 — 需验证 vLLM-Ascend 兼容性
-- **优先级**: **P0 — 首选实现目标**
+- **Applicability Analysis**:
+  - Highly applicable: Pure inference-time method, zero training cost
+  - Core insight: `</think` token attention distribution distinguishes key reasoning vs. redundancy
+  - Atom-level operations (not coarse truncation), preserves logical coherence
+  - Cross-model validation (multiple backbones + math datasets)
+  - **Risk**: Requires vLLM to expose attention weights — need to verify vLLM-Ascend compatibility
+- **Priority**: **P0 — Primary implementation target**
 
 ### 2. SAT — Stepwise Adaptive Thinking
 - **ArXiv**: [2604.07922](https://arxiv.org/abs/2604.07922) (Apr 2026)
 - **Venue**: ACL 2026 Main Conference
-- **Method**: 将推理建模为有限状态机 (FSM)，4 种思考模式 (Slow/Normal/Fast/Skip)，用轻量 PRM 动态切换
-- **Results**: **最高 40% token 减少，精度持平或提升**
-- **Training-Free**: ✅ (推理时方法，使用预训练 PRM)
-- **适用性分析**:
-  - ⭐ **高度适用**: Step-level 难度感知剪枝
-  - 9 个 LRM × 7 个 benchmark 全面验证
-  - FSM 模式优雅：简单题跳步，难题保深度
-  - **风险**: 需要预训练的 Process Reward Model (PRM)
-- **优先级**: **P0 — 并行首选**
+- **Method**: Models reasoning as a finite state machine (FSM) with 4 thinking modes (Slow/Normal/Fast/Skip), dynamically switching via a lightweight PRM
+- **Results**: **Up to 40% token reduction with maintained or improved accuracy**
+- **Training-Free**: Yes (inference-time method, uses pre-trained PRM)
+- **Applicability Analysis**:
+  - Highly applicable: Step-level difficulty-aware pruning
+  - 9 LRM x 7 benchmarks comprehensive validation
+  - FSM design is elegant: simple problems skip steps, hard problems preserve depth
+  - **Risk**: Requires pre-trained Process Reward Model (PRM)
+- **Priority**: **P0 — Parallel primary target**
 
 ### 3. Hint Tuning — Less Data Makes Better Reasoners
 - **ArXiv**: [2605.08665](https://arxiv.org/abs/2605.08665) (May 2026)
-- **Method**: 用 instruct model 作为难度探针，自动构建 No-Hint/Sparse-Hint/Full-Hint 三档训练数据
-- **Results**: **24-66% token 减少（均值 31.5%），精度竞争性保持**
-- **Training**: SFT (仅需 1K 自标注样本)
-- **适用性分析**:
-  - ⭐ **高适用性**: 支持 Qwen3-Thinking 32B，仅 1K 样本
-  - 核心洞察：instruct model = 天然难度探针
-  - 三档难度分类：No-Hint (直接答) → Sparse-Hint → Full-Hint
-  - **风险**: 需要 SFT，但训练成本极低
-- **优先级**: **P1**
+- **Method**: Uses instruct model as a difficulty probe to automatically construct 3-tier training data: No-Hint/Sparse-Hint/Full-Hint
+- **Results**: **24-66% token reduction (mean 31.5%), competitive accuracy maintained**
+- **Training**: SFT (only 1K self-annotated samples needed)
+- **Applicability Analysis**:
+  - High applicability: Supports Qwen3-Thinking 32B, only 1K samples
+  - Core insight: instruct model = natural difficulty probe
+  - 3-tier difficulty classification: No-Hint (direct answer) -> Sparse-Hint -> Full-Hint
+  - **Risk**: Requires SFT, but training cost is extremely low
+- **Priority**: **P1**
 
 ### 4. Whisper — Black-box Persuasive Prompting
 - **ArXiv**: [2510.10528](https://arxiv.org/abs/2510.10528) (Jan 2026 update)
-- **Method**: 迭代优化"说服性 prompt"，引导模型生成更简洁的推理
-- **Results**: **~40% token 减少，精度不降；Qwen3 系列验证；GSM8K 简单题 3x 缩减**
-- **Training-Free**: ✅ (纯 prompt 方法)
-- **适用性分析**:
-  - ⭐ **高度适用**: 黑盒方法，零侵入性
-  - 已验证 Qwen3 系列兼容性
-  - 迭代式 prompt 优化框架
-  - **风险**: 效果可能因数据集差异波动
-- **优先级**: **P1 — 与我们 concise prompt 实验类似但更系统化**
+- **Method**: Iteratively optimizes "persuasive prompts" to guide the model toward generating more concise reasoning
+- **Results**: **~40% token reduction with no accuracy drop; Qwen3 series verified; GSM8K simple problems 3x reduction**
+- **Training-Free**: Yes (pure prompt method)
+- **Applicability Analysis**:
+  - Highly applicable: Black-box method, zero invasiveness
+  - Qwen3 series compatibility verified
+  - Iterative prompt optimization framework
+  - **Risk**: Effectiveness may vary across datasets
+- **Priority**: **P1 — Similar to our concise prompt experiments but more systematic**
 
 ### 5. ASC — Activation-Steered Compression
 - **ArXiv**: [2507.04742](https://arxiv.org/abs/2507.04742) (Jul 2025, indexed 2026)
-- **Method**: 提取 verbose ↔ concise 的 steering vector，推理时注入到隐藏表示中
-- **Results**: **最高 67.43% CoT 缩减，精度不降；MATH500/GSM8K 验证；7B/8B/32B 均有效**
-- **Training-Free**: ✅ (仅需 100 个配对样本提取 steering vector)
+- **Method**: Extracts verbose vs. concise steering vectors and injects them into hidden representations at inference time
+- **Results**: **Up to 67.43% CoT reduction with no accuracy drop; MATH500/GSM8K verified; effective on 7B/8B/32B**
+- **Training-Free**: Yes (only needs 100 paired samples to extract steering vector)
 - **Code**: https://github.com/ArminAzizi98/ASC
-- **适用性分析**:
-  - ⭐ **极高适用性**: 32B 已验证，MATH500/GSM8K 对齐我们评测集
-  - 100 个样本即可提取 vector
-  - 2.73x 端到端加速 (8B model)
-  - **风险**: 需要修改推理流程注入 steering vector — 需验证 vLLM-Ascend 兼容性
-- **优先级**: **P0 — 与 CRISP 并列首选**
+- **Applicability Analysis**:
+  - Extremely high applicability: 32B already verified, MATH500/GSM8K aligns with our eval suite
+  - 100 samples sufficient to extract vector
+  - 2.73x end-to-end speedup (8B model)
+  - **Risk**: Requires modifying inference pipeline to inject steering vector — need to verify vLLM-Ascend compatibility
+- **Priority**: **P0 — Tied with CRISP as top choice**
 
 ---
 
 ## Tier 2: High-Value RL-Based Methods (Training Required)
 
-> 这些方法需要 RL 训练，不适合直接使用，但其设计思想可借鉴到 training-free 方案。
+> These methods require RL training and are not suitable for direct use, but their design ideas can inform training-free approaches.
 
 ### 6. ExpThink — Experience-Guided RL for Adaptive CoT Compression
 - **ArXiv**: [2605.07501](https://arxiv.org/abs/2605.07501) (May 2026)
-- **Results**: **77% 平均长度缩减 + 精度提升**
-- **Key Insight**: experience-guided reward shaping — 追踪每题最短正确解，三档奖励
-- **借鉴价值**: 三档奖励思想可用于 prompt 设计 (concise/normal/detailed)
+- **Results**: **77% average length reduction + accuracy improvement**
+- **Key Insight**: Experience-guided reward shaping — tracks shortest correct solution per problem, 3-tier reward
+- **Reference Value**: 3-tier reward concept applicable to prompt design (concise/normal/detailed)
 
 ### 7. LEAD — Length-Efficient Adaptive and Dynamic Reasoning
 - **ArXiv**: [2605.09806](https://arxiv.org/abs/2605.09806) (May 2026)
-- **Results**: 最高精度 + Accuracy-Efficiency Score
-- **Key Insight**: 动态校准 correctness-efficiency trade-off + per-problem adaptive target length
-- **借鉴价值**: per-problem target length 思想 → 可用于 budget-aware prompt
+- **Results**: Highest accuracy + Accuracy-Efficiency Score
+- **Key Insight**: Dynamic calibration of correctness-efficiency trade-off + per-problem adaptive target length
+- **Reference Value**: Per-problem target length concept -> usable in budget-aware prompts
 
 ### 8. SmartThinker — Progressive CoT Length Calibration
 - **ArXiv**: [2603.08000](https://arxiv.org/abs/2603.08000) (Mar 2026)
-- **Results**: **52.5% 压缩 + 精度提升 + AIME25 上 16.6% 精度提升**
-- **Key Insight**: 动态估计最优长度 + 动态调整奖励系数
-- **借鉴价值**: "最优长度估计"思想 → prompt 中嵌入 target token count
+- **Results**: **52.5% compression + accuracy improvement + 16.6% accuracy gain on AIME25**
+- **Key Insight**: Dynamic estimation of optimal length + dynamic reward coefficient adjustment
+- **Reference Value**: "Optimal length estimation" concept -> embed target token count in prompts
 
 ### 9. STACK — State-Aware Reasoning Compression with Knowledge Guidance
 - **ArXiv**: [2604.09150](https://arxiv.org/abs/2604.09150) (Apr 2026)
-- **Results**: **59.9% 平均长度缩减 + 4.8% 精度提升**
-- **Key Insight**: step-wise 压缩 + RAG 辅助 + answer-convergence 早期停止
-- **借鉴价值**: answer-convergence early stopping 可直接用于推理时
+- **Results**: **59.9% average length reduction + 4.8% accuracy improvement**
+- **Key Insight**: Step-wise compression + RAG assistance + answer-convergence early stopping
+- **Reference Value**: Answer-convergence early stopping directly applicable at inference time
 
 ### 10. ICR — Implicit Compression Regularization
 - **ArXiv**: [2605.07316](https://arxiv.org/abs/2605.07316) (May 2026)
-- **Key Insight**: 当 length-accuracy 负相关时 = overthinking，用最短正确解作为隐式压缩信号
-- **借鉴价值**: length-accuracy correlation 作为 overthinking 检测器
+- **Key Insight**: When length-accuracy correlation is negative = overthinking; use shortest correct solution as implicit compression signal
+- **Reference Value**: Length-accuracy correlation as overthinking detector
 
 ---
 
@@ -130,26 +130,26 @@
 
 ### 11. EAT — Entropy After `</think`
 - **ArXiv**: [2509.26522](https://arxiv.org/abs/2509.26522) (Apr 2026 update)
-- **Method**: 监控 `</think` 后 token 的 entropy 变化，当 entropy 稳定后提前退出
-- **Results**: **12-22% token 减少，精度不降**
-- **Training-Free**: ✅
-- **Black-box**: ✅ (可用 proxy model)
-- **适用性**: 中等 — 压缩幅度不够大（目标 ≥30%）
+- **Method**: Monitors entropy changes in tokens after `</think`, exiting early when entropy stabilizes
+- **Results**: **12-22% token reduction with no accuracy drop**
+- **Training-Free**: Yes
+- **Black-box**: Yes (can use proxy model)
+- **Applicability**: Moderate — compression range insufficient (target is >=30%)
 
 ### 12. RCPD — Reasoning Completion Point Detector
 - **ArXiv**: [2508.17627](https://arxiv.org/abs/2508.17627) (Jan 2026 update)
-- **Method**: 监控终止 token 的 rank dynamics，检测推理完成点
-- **Results**: **最高 44% token 减少，精度不降**
-- **Training-Free**: ✅
-- **适用性**: ⭐ 高 — 在 Qwen3 和 DeepSeek-R1 上验证
+- **Method**: Monitors rank dynamics of termination tokens to detect reasoning completion points
+- **Results**: **Up to 44% token reduction with no accuracy drop**
+- **Training-Free**: Yes
+- **Applicability**: High — verified on Qwen3 and DeepSeek-R1
 
 ### 13. Dynamic Early Exit in Reasoning Models
 - **ArXiv**: [2504.15895](https://arxiv.org/abs/2504.15895) (Sep 2025, indexed 2026)
-- **Method**: 在推理转换点监控模型行为，高置信度时动态终止
-- **Results**: **19.1%-80.1% CoT 长度缩减 + 0.3%-5.0% 精度提升**
-- **Training-Free**: ✅
-- **11 个 LRM × 10 个 benchmark** 全面验证
-- **适用性**: ⭐⭐ 极高 — 跨模型验证最广
+- **Method**: Monitors model behavior at reasoning transition points, dynamically terminating when confidence is high
+- **Results**: **19.1%-80.1% CoT length reduction + 0.3%-5.0% accuracy improvement**
+- **Training-Free**: Yes
+- **11 LRM x 10 benchmarks** comprehensive validation
+- **Applicability**: Extremely high — broadest cross-model validation
 
 ---
 
@@ -157,29 +157,29 @@
 
 ### 14. DTR — Think Deep, Not Just Long (Deep-Thinking Token Ratio)
 - **ArXiv**: [2602.13517](https://arxiv.org/abs/2602.13517) (Feb 2026)
-- **这不是压缩方法！** 这是一个**推理质量度量 + 采样策略**
-- **Core Concept**: Deep-thinking tokens = 内部预测在深层经历显著修正的 token
-  - Deep-thinking ratio (DTR) = deep-thinking tokens 占总 token 的比例
-  - DTR 与 accuracy 正相关（比 raw token count 和 confidence 都好）
-- **Application**: Think@n — 优先采样 DTR 高的样本，early reject 低 DTR 前缀
-- **对项目的价值**:
-  - ⭐ **极高参考价值**: 可作为我们实验的**质量度量标准**
-  - 验证任何压缩方法的 DTR 是否保持/提升
-  - Think@n 策略可用于我们的 multi-sample 推理
-  - **不直接解决压缩问题，但提供了科学的评估框架**
-- **优先级**: P1 — 作为评估指标集成
+- **This is NOT a compression method!** It is a **reasoning quality metric + sampling strategy**
+- **Core Concept**: Deep-thinking tokens = tokens whose internal predictions undergo significant revision in deep layers
+  - Deep-thinking ratio (DTR) = proportion of deep-thinking tokens to total tokens
+  - DTR positively correlates with accuracy (better than raw token count and confidence)
+- **Application**: Think@n — prioritize sampling high-DTR responses, early reject low-DTR prefixes
+- **Value for the Project**:
+  - Extremely high reference value: can serve as a **quality metric** for our experiments
+  - Verify whether any compression method maintains/improves DTR
+  - Think@n strategy applicable to our multi-sample inference
+  - Does not directly solve compression, but provides a scientific evaluation framework
+- **Priority**: P1 — integrate as evaluation metric
 
 ### 15. CIB — Conditional Information Bottleneck for Reasoning
 - **ArXiv**: [2603.08462](https://arxiv.org/abs/2603.08462) (Mar 2026)
-- **理论贡献**: 将高效推理形式化为有损压缩问题，统一 budget forcing
-- **Key Result**: semantic prior (token surprisal) > naive length penalty
-- **借鉴价值**: 理论框架解释为什么 CRISP/ASC 等 semantic 方法优于 length truncation
+- **Theoretical Contribution**: Formalizes efficient reasoning as a lossy compression problem, unifying budget forcing
+- **Key Result**: Semantic prior (token surprisal) > naive length penalty
+- **Reference Value**: Theoretical framework explaining why semantic methods like CRISP/ASC outperform length truncation
 
 ### 16. Shorter, but Still Trustworthy?
 - **ArXiv**: [2604.04120](https://arxiv.org/abs/2604.04120) (Apr 2026)
-- **贡献**: 首个系统性研究 CoT 压缩对 trustworthiness (安全/幻觉/多语言) 的影响
-- **Key Finding**: 不同压缩方法有不同的 trustworthiness 退化特征
-- **对项目价值**: 评估指标参考 — 压缩方法不仅要保精度，还要保可信度
+- **Contribution**: First systematic study on the impact of CoT compression on trustworthiness (safety/hallucination/multilingual)
+- **Key Finding**: Different compression methods exhibit different trustworthiness degradation characteristics
+- **Project Value**: Evaluation metric reference — compression methods must preserve not only accuracy but also trustworthiness
 
 ---
 
@@ -187,14 +187,14 @@
 
 ### 17. Draft-Thinking
 - **ArXiv**: [2603.00578](https://arxiv.org/abs/2603.00578) (Feb 2026)
-- **Method**: 学习 concise draft-style 推理结构 + progressive curriculum learning
-- **Results**: MATH500 上 82.6% 预算缩减，仅 2.6% 精度降
-- **需 SFT + RL**: 不适合直接使用
+- **Method**: Learns concise draft-style reasoning structure + progressive curriculum learning
+- **Results**: 82.6% budget reduction on MATH500 with only 2.6% accuracy drop
+- **Requires SFT + RL**: Not suitable for direct use
 
 ### 18. MemoSight — Unified Context Compression + Multi-Token Prediction
 - **ArXiv**: [2604.14889](https://arxiv.org/abs/2604.14889) (Apr 2026)
-- **Results**: 66% KV cache 缩减 + 1.56x 加速
-- **需架构修改**: 不适合 vLLM-Ascend
+- **Results**: 66% KV cache reduction + 1.56x speedup
+- **Requires Architecture Modification**: Not compatible with vLLM-Ascend
 
 ---
 
@@ -202,14 +202,14 @@
 
 | Method | Token Reduction | Accuracy | GSM8K | MATH500 | GPQA | AIME | Code | vLLM Compatible |
 |--------|----------------|----------|-------|---------|------|------|------|-----------------|
-| **CRISP** | 50-60% | 不降 | ✅ | ✅ | ❓ | ❓ | ✅ | 需验证(attention) |
-| **SAT** | ≤40% | 持平/提升 | ✅ | ✅ | ✅ | ✅ | ❓ | 需验证(PRM) |
-| **ASC** | ≤67% | 不降 | ✅ | ✅ | ❓ | ❓ | ✅ | 需验证(steering) |
-| **Whisper** | ~40% | 不降 | ✅ | ✅ | ❓ | ❓ | ❌ | ✅ (pure prompt) |
-| **RCPD** | ≤44% | 不降 | ❓ | ❓ | ✅ | ✅ | ❌ | 需验证 |
-| **Dyn. Early Exit** | 19-80% | 提升 | ✅ | ✅ | ✅ | ✅ | ❌ | 需验证 |
-| **EAT** | 12-22% | 不降 | ❓ | ✅ | ❓ | ✅ | ✅ | 需验证 |
-| **Don't Overthink** | ≤40% | 持平/提升 | ✅ | ✅ | ✅ | ❓ | ❌ | ✅ |
+| **CRISP** | 50-60% | No drop | Yes | Yes | ? | ? | Yes | Needs verification (attention) |
+| **SAT** | <=40% | Maintained/Improved | Yes | Yes | Yes | Yes | ? | Needs verification (PRM) |
+| **ASC** | <=67% | No drop | Yes | Yes | ? | ? | Yes | Needs verification (steering) |
+| **Whisper** | ~40% | No drop | Yes | Yes | ? | ? | No | Yes (pure prompt) |
+| **RCPD** | <=44% | No drop | ? | ? | Yes | Yes | No | Needs verification |
+| **Dyn. Early Exit** | 19-80% | Improved | Yes | Yes | Yes | Yes | No | Needs verification |
+| **EAT** | 12-22% | No drop | ? | Yes | ? | Yes | Yes | Needs verification |
+| **Don't Overthink** | <=40% | Maintained/Improved | Yes | Yes | Yes | ? | No | Yes |
 
 ---
 
@@ -217,35 +217,35 @@
 
 ### Primary Implementation Priority (Training-Free)
 
-1. **CRISP** (P0) — 最高压缩比 + 精度不降，ACL 2026，有代码
-2. **ASC** (P0) — 67% 压缩，32B 已验证，100 样本即可用
-3. **SAT** (P0) — ACL 2026 Main，step-level 粒度最精细
+1. **CRISP** (P0) — Highest compression ratio + no accuracy drop, ACL 2026, code available
+2. **ASC** (P0) — 67% compression, 32B verified, 100 samples to deploy
+3. **SAT** (P0) — ACL 2026 Main, finest step-level granularity
 
 ### Secondary (Low-effort, Quick Wins)
 
-4. **Whisper** (P1) — 纯 prompt 方法，可立即验证
-5. **Dynamic Early Exit** (P1) — 最广泛验证的方法
-6. **Hint Tuning** (P1) — 1K 样本 SFT 即可
+4. **Whisper** (P1) — Pure prompt method, immediately verifiable
+5. **Dynamic Early Exit** (P1) — Most broadly validated method
+6. **Hint Tuning** (P1) — 1K sample SFT sufficient
 
 ### Evaluation Enhancement
 
-7. **DTR** (P1) — 集成为质量评估指标，不作为压缩方法
-8. **Trustworthiness** (P2) — 参考 Shorter but Trustworthy 的评估维度
+7. **DTR** (P1) — Integrate as quality evaluation metric, not as a compression method
+8. **Trustworthiness** (P2) — Reference evaluation dimensions from "Shorter but Still Trustworthy"
 
-### RL-Based (Phase 3 考虑)
+### RL-Based (Phase 3 Consideration)
 
-9. **ExpThink** — 77% 压缩 + 精度提升，最强 RL 方法
-10. **SmartThinker** — 52.5% 压缩 + AIME25 显著提升
+9. **ExpThink** — 77% compression + accuracy improvement, strongest RL method
+10. **SmartThinker** — 52.5% compression + significant AIME25 improvement
 
 ---
 
 ## Papers Not Recommended
 
-- **MemoSight**: 架构修改，不兼容 vLLM-Ascend
-- **Draft-Thinking**: 需要 SFT+RL pipeline
-- **CIB**: 理论框架，不是实现方案
-- **Neural Garbage Collection**: KV cache 管理，非 CoT 压缩
-- **SketchThinker-R1**: 多模态，不适用纯文本推理
+- **MemoSight**: Architecture modification, incompatible with vLLM-Ascend
+- **Draft-Thinking**: Requires SFT+RL pipeline
+- **CIB**: Theoretical framework, not an implementation approach
+- **Neural Garbage Collection**: KV cache management, not CoT compression
+- **SketchThinker-R1**: Multimodal, not applicable to text-only reasoning
 
 ---
 

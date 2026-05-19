@@ -4,13 +4,13 @@ paper:
   year: 2025
   venue: "Preprint"
   authors: "Yang et al."
-  technique_summary: "DEER 监控推理过程中的 Wait 断点，注入试答提示，通过 logprobs 评估置信度，高置信度时提前退出推理。支持渐进式预算 [0.5x, 0.8x, 1.0x] 多轮评估。"
+  technique_summary: "DEER monitors Wait breakpoints during reasoning, injects trial answer prompts, evaluates confidence via logprobs, and exits early when confidence is high. Supports progressive budgets [0.5x, 0.8x, 1.0x] for multi-round evaluation."
   key_algorithms:
-    - "Wait Breakpoint Detection: 识别推理过程中的 Wait/重审断点作为候选退出位置"
-    - "Trial Answer Injection: 在断点处注入试答提示，引导模型生成中间答案"
-    - "Confidence Evaluation: 基于 logprobs 评估试答置信度（启发式回退方案）"
-    - "Early Exit Decision: 置信度超过阈值时提前终止推理，节省 token"
-    - "Progressive Budget: 渐进式多轮预算 [0.5x, 0.8x, 1.0x]，逐步放宽退出条件"
+    - "Wait Breakpoint Detection: Identifies Wait/re-evaluation breakpoints in reasoning as candidate exit points"
+    - "Trial Answer Injection: Injects trial answer prompts at breakpoints to guide the model to produce intermediate answers"
+    - "Confidence Evaluation: Evaluates trial answer confidence based on logprobs (heuristic fallback scheme)"
+    - "Early Exit Decision: Terminates reasoning early when confidence exceeds threshold, saving tokens"
+    - "Progressive Budget: Progressive multi-round budgets [0.5x, 0.8x, 1.0x], gradually relaxing exit conditions"
   evaluation_datasets:
     - name: "GSM8K"
       scale: 500
