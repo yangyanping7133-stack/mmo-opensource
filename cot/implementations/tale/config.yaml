@@ -1,0 +1,44 @@
+method: tale
+paper: "arXiv:2412.18547"
+description: "Token-Budget-Aware LLM Reasoning — preset budget + prompt injection + max_tokens truncation"
+
+params:
+  mode: preset
+  temperature: 0.6
+  use_system_prompt: true
+
+token_budget:
+  easy:
+    default: 800
+    max_completion: 1312
+  medium:
+    default: 500
+    max_completion: 1012
+  hard:
+    default: 2000
+    max_completion: 2512
+
+dataset_mapping:
+  GSM8K: easy
+  gsm8k: easy
+  MATH-500: hard
+  MATH500: hard
+  math500: hard
+  GPQA: medium
+  gpqa: medium
+  AIME: hard
+  aime: hard
+  AMC: hard
+  amc: hard
+
+baseline_think_tokens:
+  GSM8K: 1144
+  gsm8k: 1144
+  MATH500: 2800
+  math500: 2800
+  GPQA: 651
+  gpqa: 651
+  AMC: 4240
+  amc: 4240
+  AIME: 7986
+  aime: 7986

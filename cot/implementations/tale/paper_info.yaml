@@ -1,0 +1,28 @@
+paper:
+  title: "Token-Budget-Aware LLM Reasoning"
+  url: "https://arxiv.org/abs/2412.18547"
+  year: 2025
+  venue: "ACL 2025 Findings"
+  authors: "Wang et al."
+  technique_summary: "根据问题复杂度动态估计 token 预算，在 prompt 中注入预算约束引导模型生成更短推理。TALE-EP 使用外部 LLM 预测预算，TALE-PT 通过参数调优内化预算估计。"
+  key_algorithms:
+    - "Token Budget Estimation: 基于问题复杂度估计推理所需最小 token 数"
+    - "Budget Injection: 将预算约束注入 prompt 引导模型精简推理"
+    - "Budget Search: 二分搜索找到最优预算（保持精度的前提下最小化 token）"
+    - "Preset Budget: 按数据集难度分档预设 token 预算（免训练部署）"
+  evaluation_datasets:
+    - name: "GSM8K"
+      scale: 500
+      type: "math"
+    - name: "MATH-500"
+      scale: 500
+      type: "math"
+    - name: "GPQA"
+      scale: 200
+      type: "multiple_choice"
+    - name: "AMC"
+      scale: 40
+      type: "math"
+    - name: "AIME"
+      scale: 30
+      type: "math"
